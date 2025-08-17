@@ -1,4 +1,4 @@
--- FinTrack Complete Database Reset
+-- SimplySpent Complete Database Reset
 -- This script will completely reset the database and recreate all objects
 
 -- Drop all existing objects in the correct order

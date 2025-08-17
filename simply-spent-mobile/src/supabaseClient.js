@@ -1,4 +1,98 @@
 import { createClient } from '@supabase/supabase-js'
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@env'
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+// Environment variables - replace these with your actual values
+const SUPABASE_URL = 'https://bxlkhxstrdnccqcacarg.supabase.co'
+const SUPABASE_ANON_KEY = 'eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4bGtoeHN0cmRuY2NxY2FjYXJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0NDM5NzUsImV4cCI6MjA3MTAxOTk3NX0'
+
+// Check if environment variables are configured (not placeholder values)
+let supabase
+
+if (SUPABASE_URL === 'https://your-project-id.supabase.co' || SUPABASE_ANON_KEY === 'your-anon-key-here') {
+  console.error(`
+    ⚠️  Supabase configuration missing!
+    
+    Please update the SUPABASE_URL and SUPABASE_ANON_KEY in:
+    simply-spent-mobile/src/supabaseClient.js
+    
+    You can find these values in your Supabase project dashboard under Settings > API.
+  `)
+  
+  // Create a dummy client to prevent crashes
+  supabase = {
+    from: () => ({
+      select: () => ({ eq: () => Promise.resolve({ data: [], error: null }) }),
+      insert: () => Promise.resolve({ error: new Error('Supabase not configured') }),
+      update: () => ({ eq: () => Promise.resolve({ error: new Error('Supabase not configured') }) }),
+      delete: () => ({ eq: () => Promise.resolve({ error: new Error('Supabase not configured') }) })
+    }),
+    auth: {
+      signIn: () => Promise.resolve({ error: new Error('Supabase not configured') }),
+      signUp: () => Promise.resolve({ error: new Error('Supabase not configured') }),
+      signOut: () => Promise.resolve({ error: new Error('Supabase not configured') }),
+      getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+      onAuthStateChange: (callback) => {
+        // Return a function to unsubscribe
+        return { data: { subscription: { unsubscribe: () => {} } } }
+      },
+      // Add missing authentication methods
+      signInWithPassword: () => Promise.resolve({ error: new Error('Supabase not configured') }),
+      signUpWithPassword: () => Promise.resolve({ error: new Error('Supabase not configured') }),
+      signInWithOtp: () => Promise.resolve({ error: new Error('Supabase not configured') }),
+      signUpWithOtp: () => Promise.resolve({ error: new Error('Supabase not configured') }),
+      resetPasswordForEmail: () => Promise.resolve({ error: new Error('Supabase not configured') }),
+      updateUser: () => Promise.resolve({ error: new Error('Supabase not configured') }),
+      getUser: () => Promise.resolve({ data: { user: null }, error: null })
+    }
+  }
+} else {
+  console.log('✅ Supabase configured successfully!')
+  
+  try {
+    // Create Supabase client with React Native friendly configuration
+    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: false, // Disable session persistence to avoid URL issues
+        detectSessionInUrl: false,
+      },
+      global: {
+        headers: {
+          'X-Client-Info': 'simply-spent-mobile'
+        }
+      }
+    })
+  } catch (error) {
+    console.error('❌ Error creating Supabase client:', error.message)
+    console.log('🔄 Falling back to dummy client...')
+    
+    // Fallback to dummy client if Supabase client creation fails
+    supabase = {
+      from: () => ({
+        select: () => ({ eq: () => Promise.resolve({ data: [], error: null }) }),
+        insert: () => Promise.resolve({ error: new Error('Supabase connection failed') }),
+        update: () => ({ eq: () => Promise.resolve({ error: new Error('Supabase connection failed') }) }),
+        delete: () => ({ eq: () => Promise.resolve({ error: new Error('Supabase connection failed') }) })
+      }),
+      auth: {
+        signIn: () => Promise.resolve({ error: new Error('Supabase connection failed') }),
+        signUp: () => Promise.resolve({ error: new Error('Supabase connection failed') }),
+        signOut: () => Promise.resolve({ error: new Error('Supabase connection failed') }),
+        getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+        onAuthStateChange: (callback) => {
+          // Return a function to unsubscribe
+          return { data: { subscription: { unsubscribe: () => {} } } }
+        },
+        // Add missing authentication methods
+        signInWithPassword: () => Promise.resolve({ error: new Error('Supabase connection failed') }),
+        signUpWithPassword: () => Promise.resolve({ error: new Error('Supabase connection failed') }),
+        signInWithOtp: () => Promise.resolve({ error: new Error('Supabase connection failed') }),
+        signUpWithOtp: () => Promise.resolve({ error: new Error('Supabase connection failed') }),
+        resetPasswordForEmail: () => Promise.resolve({ error: new Error('Supabase connection failed') }),
+        updateUser: () => Promise.resolve({ error: new Error('Supabase connection failed') }),
+        getUser: () => Promise.resolve({ data: { user: null }, error: null })
+      }
+    }
+  }
+}
+
+export { supabase }

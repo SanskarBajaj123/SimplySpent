@@ -131,7 +131,7 @@ function TransactionItem({ transaction, onTransactionUpdated, onTransactionDelet
 
   if (isEditing) {
     return (
-      <div className="px-6 py-4 bg-blue-50/50 border-l-4 border-blue-500 rounded-lg">
+      <div className="px-4 sm:px-6 py-4 bg-blue-50/50 border-l-4 border-blue-500 rounded-lg">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h4 className="font-semibold text-gray-900">Edit Transaction</h4>
@@ -151,7 +151,7 @@ function TransactionItem({ transaction, onTransactionUpdated, onTransactionDelet
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
               <div className="relative">
@@ -232,7 +232,7 @@ function TransactionItem({ transaction, onTransactionUpdated, onTransactionDelet
 
   return (
     <div
-      className={`px-6 py-4 transition-all duration-200 hover:bg-gray-50/50 cursor-pointer relative group ${
+      className={`px-4 sm:px-6 py-4 transition-all duration-200 hover:bg-gray-50/50 cursor-pointer relative group ${
         isHovered ? 'transform scale-[1.02]' : ''
       }`}
       onMouseEnter={() => setIsHovered(true)}
@@ -241,34 +241,36 @@ function TransactionItem({ transaction, onTransactionUpdated, onTransactionDelet
     >
       <div className="flex items-center justify-between">
         {/* Left side - Icon and Details */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
           {/* Category Icon */}
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-sm ${
+          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-lg sm:text-xl shadow-sm flex-shrink-0 ${
             isIncome ? 'bg-green-100' : 'bg-red-100'
           }`}>
             {getCategoryIcon(transaction.category)}
           </div>
           
           {/* Transaction Details */}
-          <div className="flex-1">
-            <div className="flex items-center space-x-3 mb-1">
-              <h4 className="font-semibold text-gray-900">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center space-x-2 sm:space-x-3 mb-1">
+              <h4 className="font-semibold text-gray-900 text-sm sm:text-base truncate">
                 {transaction.category}
               </h4>
-              <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getCategoryColor(transaction.category, transaction.transaction_type)}`}>
+              <span className={`px-2 py-1 text-xs font-medium rounded-full border flex-shrink-0 ${getCategoryColor(transaction.category, transaction.transaction_type)}`}>
                 {transaction.category}
               </span>
             </div>
             
-            <div className="flex items-center space-x-4 text-sm text-gray-500">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs sm:text-sm text-gray-500">
               <span>{formatDate(transaction.transaction_date)}</span>
               {transaction.notes && (
-                <span className="flex items-center">
+                <span className="flex items-center truncate">
                   <span className="mr-1">📝</span>
-                  {transaction.notes.length > 30 
-                    ? `${transaction.notes.substring(0, 30)}...` 
-                    : transaction.notes
-                  }
+                  <span className="truncate">
+                    {transaction.notes.length > 20 
+                      ? `${transaction.notes.substring(0, 20)}...` 
+                      : transaction.notes
+                    }
+                  </span>
                 </span>
               )}
             </div>
@@ -276,8 +278,8 @@ function TransactionItem({ transaction, onTransactionUpdated, onTransactionDelet
         </div>
 
         {/* Right side - Amount and Actions */}
-        <div className="text-right">
-          <div className={`text-lg font-bold ${
+        <div className="text-right flex-shrink-0 ml-2">
+          <div className={`text-base sm:text-lg font-bold ${
             isIncome ? 'text-green-600' : 'text-red-600'
           }`}>
             {formattedAmount}
@@ -289,45 +291,61 @@ function TransactionItem({ transaction, onTransactionUpdated, onTransactionDelet
           }`}>
             {transaction.transaction_type}
           </div>
-          {/* Edit indicator */}
-          {isHovered && (
-            <div className="mt-1 text-xs text-blue-600 opacity-75">
-              ✏️ Click to edit
-            </div>
-          )}
         </div>
       </div>
 
-      {/* Action Buttons - Show on hover */}
-      {isHovered && (
-        <div className="absolute top-2 right-2 flex space-x-2 opacity-100 transition-opacity duration-200">
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              setIsEditing(true)
-            }}
-            className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors"
-            title="Edit transaction"
-          >
-            ✏️
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              setShowDeleteConfirm(true)
-            }}
-            className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors"
-            title="Delete transaction"
-          >
-            🗑️
-          </button>
-        </div>
-      )}
+      {/* Action Buttons - Always visible on mobile, hover on desktop */}
+      <div className={`absolute top-2 right-2 flex space-x-1 sm:space-x-2 ${
+        isHovered ? 'opacity-100' : 'opacity-0 sm:opacity-0'
+      } transition-opacity duration-200 sm:group-hover:opacity-100`}>
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            setIsEditing(true)
+          }}
+          className="p-1.5 sm:p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors"
+          title="Edit transaction"
+        >
+          <span className="text-sm sm:text-base">✏️</span>
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            setShowDeleteConfirm(true)
+          }}
+          className="p-1.5 sm:p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors"
+          title="Delete transaction"
+        >
+          <span className="text-sm sm:text-base">🗑️</span>
+        </button>
+      </div>
+
+      {/* Mobile Action Buttons - Always visible on mobile */}
+      <div className="sm:hidden flex justify-center mt-3 space-x-2">
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            setIsEditing(true)
+          }}
+          className="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors text-sm"
+        >
+          ✏️ Edit
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            setShowDeleteConfirm(true)
+          }}
+          className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors text-sm"
+        >
+          🗑️ Delete
+        </button>
+      </div>
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md mx-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Transaction</h3>
             <p className="text-gray-600 mb-4">
               Are you sure you want to delete this transaction? This action cannot be undone.
@@ -352,14 +370,14 @@ function TransactionItem({ transaction, onTransactionUpdated, onTransactionDelet
         </div>
       )}
 
-      {/* Hover effect indicator */}
+      {/* Hover effect indicator - Desktop only */}
       {isHovered && (
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-lg pointer-events-none"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-lg pointer-events-none hidden sm:block"></div>
       )}
       
-      {/* Click hint - show on hover */}
+      {/* Click hint - Desktop only */}
       {isHovered && (
-        <div className="absolute bottom-1 left-6 text-xs text-blue-600 opacity-75">
+        <div className="absolute bottom-1 left-6 text-xs text-blue-600 opacity-75 hidden sm:block">
           Click to edit
         </div>
       )}

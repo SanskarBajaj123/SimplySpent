@@ -35,7 +35,7 @@ git init
 git add .
 
 # Create initial commit
-git commit -m "Initial commit: FinTrack Personal Finance Tracker"
+git commit -m "Initial commit: SimplySpent Personal Finance Tracker"
 
 # Add remote repository (replace YOUR_USERNAME with your GitHub username)
 git remote add origin https://github.com/YOUR_USERNAME/simply-spent.git

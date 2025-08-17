@@ -1,4 +1,4 @@
-# FinTrack Setup Commands
+# SimplySpent Setup Commands
 
 ## Milestone 3: Web App Setup
 

@@ -1,4 +1,4 @@
--- FinTrack Row Level Security Policies
+-- SimplySpent Row Level Security Policies
 -- Milestone 2: Backend Security Rules
 
 -- Profiles table policies

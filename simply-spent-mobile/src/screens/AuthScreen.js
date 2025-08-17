@@ -63,7 +63,7 @@ export default function AuthScreen({ onAuthSuccess }) {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.formContainer}>
           <Text style={styles.title}>
-            {isLogin ? 'Sign in to FinTrack' : 'Create your account'}
+            {isLogin ? 'Sign in to SimplySpent' : 'Create your account'}
           </Text>
           
           <Text style={styles.subtitle}>

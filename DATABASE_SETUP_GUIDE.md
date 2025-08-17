@@ -1,4 +1,4 @@
-# FinTrack Database Setup Guide
+# SimplySpent Database Setup Guide
 
 ## 🚨 Current Issue
 You're getting the error: `ERROR: 42710: type "transaction_type" already exists`

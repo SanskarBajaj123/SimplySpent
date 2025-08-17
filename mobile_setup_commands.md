@@ -1,4 +1,4 @@
-# FinTrack Mobile App Setup Commands
+# SimplySpent Mobile App Setup Commands
 
 ## Milestone 6: Mobile App (React Native with Expo)
 

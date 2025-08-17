@@ -1,4 +1,4 @@
--- FinTrack Database Status Checker
+-- SimplySpent Database Status Checker
 -- This script will show you the current state of your database
 
 -- Check if the enum type exists

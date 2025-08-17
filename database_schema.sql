@@ -1,4 +1,4 @@
--- FinTrack Database Schema
+-- SimplySpent Database Schema
 -- Milestone 1: Supabase Setup & Database Schema
 
 -- Create custom enum type for transaction types
