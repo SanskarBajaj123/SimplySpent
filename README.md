@@ -1,4 +1,4 @@
-# FinTrack - Expense Tracker Application
+# SimplySpent - Expense Tracker Application
 
 A complete, full-stack expense tracker application with web and mobile support, built with React, React Native, and Supabase.
 
@@ -32,12 +32,12 @@ A complete, full-stack expense tracker application with web and mobile support, 
 ## 📁 Project Structure
 
 ```
-FinTracker/
+SimplySpent/
 ├── database_schema.sql          # Database schema and setup
 ├── rls_policies.sql            # Row Level Security policies
 ├── setup_commands.md           # Web app setup instructions
 ├── mobile_setup_commands.md    # Mobile app setup instructions
-├── fin-track-web/              # Web application
+├── simply-spent-web/           # Web application
 │   ├── src/
 │   │   ├── components/         # Reusable components
 │   │   ├── pages/             # Page components
@@ -46,7 +46,7 @@ FinTracker/
 │   │   └── main.jsx           # App entry point
 │   ├── package.json
 │   └── README.md
-└── fin-track-mobile/           # Mobile application
+└── simply-spent-mobile/        # Mobile application
     ├── src/
     │   ├── components/         # Mobile components
     │   ├── screens/           # Screen components

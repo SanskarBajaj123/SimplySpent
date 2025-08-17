@@ -1,6 +1,6 @@
-# 🚀 FinTrack Deployment Guide
+# 🚀 SimplySpent Deployment Guide
 
-This guide will walk you through deploying your FinTrack application to GitHub and Vercel.
+This guide will walk you through deploying your SimplySpent application to GitHub and Vercel.
 
 ## 📋 Prerequisites
 
@@ -17,8 +17,8 @@ This guide will walk you through deploying your FinTrack application to GitHub a
 2. Click the "+" icon in the top right corner
 3. Select "New repository"
 4. Fill in the details:
-   - **Repository name**: `fin-track` (or your preferred name)
-   - **Description**: "Personal Finance Tracker - Track income, expenses, and get detailed analytics"
+       - **Repository name**: `simply-spent` (or your preferred name)
+    - **Description**: "Personal Finance Tracker - Track income, expenses, and get detailed analytics"
    - **Visibility**: Choose Public or Private
    - **Initialize with**: Don't initialize (we'll push existing code)
 5. Click "Create repository"
@@ -38,7 +38,7 @@ git add .
 git commit -m "Initial commit: FinTrack Personal Finance Tracker"
 
 # Add remote repository (replace YOUR_USERNAME with your GitHub username)
-git remote add origin https://github.com/YOUR_USERNAME/fin-track.git
+git remote add origin https://github.com/YOUR_USERNAME/simply-spent.git
 
 # Push to GitHub
 git branch -M main
@@ -53,7 +53,7 @@ git push -u origin main
 2. Click "New Project"
 3. Import your GitHub repository:
    - Select "Import Git Repository"
-   - Find and select your `fin-track` repository
+       - Find and select your `simply-spent` repository
    - Click "Import"
 
 ### 2.2 Configure Project Settings
@@ -83,7 +83,7 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 
 1. Click "Deploy"
 2. Wait for the build to complete (usually 2-3 minutes)
-3. Your app will be live at a URL like: `https://fin-track-xxxxx.vercel.app`
+3. Your app will be live at a URL like: `https://simply-spent-xxxxx.vercel.app`
 
 ## 🔄 Step 3: Continuous Deployment
 
@@ -209,7 +209,7 @@ git push origin main
 
 ## 🎉 Congratulations!
 
-Your FinTrack application is now live and ready to use! 
+Your SimplySpent application is now live and ready to use! 
 
 ### Quick Links:
 - **Live App**: Your Vercel URL

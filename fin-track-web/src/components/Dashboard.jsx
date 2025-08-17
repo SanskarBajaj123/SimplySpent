@@ -174,9 +174,14 @@ function Dashboard({ user }) {
               </button>
             </div>
           ) : (
-            transactions.map((transaction) => (
-              <TransactionItem key={transaction.id} transaction={transaction} />
-            ))
+                         transactions.map((transaction) => (
+               <TransactionItem 
+                 key={transaction.id} 
+                 transaction={transaction}
+                 onTransactionUpdated={fetchTransactions}
+                 onTransactionDeleted={fetchTransactions}
+               />
+             ))
           )}
         </div>
       </div>

@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage'
 import MetricsPage from './pages/MetricsPage'
 import ProfilePage from './pages/ProfilePage'
 import Navigation from './components/Navigation'
+import Footer from './components/Footer'
 
 function AppContent() {
   const [user, setUser] = useState(null)
@@ -47,7 +48,7 @@ function AppContent() {
         <div className="relative">
           <div className="animate-spin rounded-full h-32 w-32 border-4 border-blue-200 border-t-blue-600"></div>
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-blue-600 font-semibold text-lg">FinTrack</div>
+            <div className="text-blue-600 font-semibold text-lg">SimplySpent</div>
           </div>
         </div>
       </div>
@@ -63,9 +64,9 @@ function AppContent() {
 
   // If authenticated, show main app with navigation
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 flex flex-col">
       <Navigation user={user} currentPath={location.pathname} />
-      <div className="pt-16">
+      <div className="pt-16 flex-1">
         <Routes>
           <Route path="/" element={<HomePage user={user} />} />
           <Route path="/metrics" element={<MetricsPage user={user} />} />
@@ -73,6 +74,7 @@ function AppContent() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
+      <Footer />
     </div>
   )
 }

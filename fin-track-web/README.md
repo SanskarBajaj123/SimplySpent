@@ -1,8 +1,8 @@
-# 💰 FinTrack - Personal Finance Tracker
+# 💰 SimplySpent - Personal Finance Tracker
 
 A modern, responsive personal finance tracking application built with React, Supabase, and Tailwind CSS. Track your income, expenses, and get detailed analytics to manage your finances effectively.
 
-![FinTrack Dashboard](https://img.shields.io/badge/FinTrack-Personal%20Finance%20Tracker-blue?style=for-the-badge&logo=react)
+![SimplySpent Dashboard](https://img.shields.io/badge/SimplySpent-Personal%20Finance%20Tracker-blue?style=for-the-badge&logo=react)
 
 ## ✨ Features
 
@@ -41,8 +41,8 @@ A modern, responsive personal finance tracking application built with React, Sup
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/fin-track.git
-cd fin-track/fin-track-web
+git clone https://github.com/yourusername/simply-spent.git
+cd simply-spent/fin-track-web
 ```
 
 ### 2. Install Dependencies
@@ -161,8 +161,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 If you have any questions or need help:
 - Create an issue on GitHub
-- Email: support@fintrack.com
-- Documentation: [docs.fintrack.com](https://docs.fintrack.com)
+- Email: support@simplyspent.com
+- Documentation: [docs.simplyspent.com](https://docs.simplyspent.com)
 
 ---
 
