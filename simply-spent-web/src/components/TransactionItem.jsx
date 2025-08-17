@@ -73,6 +73,8 @@ function TransactionItem({ transaction, onTransactionUpdated, onTransactionDelet
 
   const handleEdit = async () => {
     try {
+      console.log('Updating transaction:', transaction.id, editForm)
+      
       const { error } = await supabase
         .from('transactions')
         .update({
@@ -83,8 +85,12 @@ function TransactionItem({ transaction, onTransactionUpdated, onTransactionDelet
         })
         .eq('id', transaction.id)
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error:', error)
+        throw error
+      }
       
+      console.log('Transaction updated successfully')
       setIsEditing(false)
       onTransactionUpdated()
     } catch (error) {
@@ -96,13 +102,19 @@ function TransactionItem({ transaction, onTransactionUpdated, onTransactionDelet
   const handleDelete = async () => {
     setIsDeleting(true)
     try {
+      console.log('Deleting transaction:', transaction.id)
+      
       const { error } = await supabase
         .from('transactions')
         .delete()
         .eq('id', transaction.id)
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error:', error)
+        throw error
+      }
       
+      console.log('Transaction deleted successfully')
       setShowDeleteConfirm(false)
       onTransactionDeleted()
     } catch (error) {
@@ -220,11 +232,12 @@ function TransactionItem({ transaction, onTransactionUpdated, onTransactionDelet
 
   return (
     <div
-      className={`px-6 py-4 transition-all duration-200 hover:bg-gray-50/50 cursor-pointer relative ${
+      className={`px-6 py-4 transition-all duration-200 hover:bg-gray-50/50 cursor-pointer relative group ${
         isHovered ? 'transform scale-[1.02]' : ''
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={() => setIsEditing(true)}
     >
       <div className="flex items-center justify-between">
         {/* Left side - Icon and Details */}
@@ -276,21 +289,33 @@ function TransactionItem({ transaction, onTransactionUpdated, onTransactionDelet
           }`}>
             {transaction.transaction_type}
           </div>
+          {/* Edit indicator */}
+          {isHovered && (
+            <div className="mt-1 text-xs text-blue-600 opacity-75">
+              ✏️ Click to edit
+            </div>
+          )}
         </div>
       </div>
 
       {/* Action Buttons - Show on hover */}
       {isHovered && (
-        <div className="absolute top-2 right-2 flex space-x-2 opacity-0 animate-in fade-in duration-200">
+        <div className="absolute top-2 right-2 flex space-x-2 opacity-100 transition-opacity duration-200">
           <button
-            onClick={() => setIsEditing(true)}
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsEditing(true)
+            }}
             className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors"
             title="Edit transaction"
           >
             ✏️
           </button>
           <button
-            onClick={() => setShowDeleteConfirm(true)}
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowDeleteConfirm(true)
+            }}
             className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors"
             title="Delete transaction"
           >
@@ -330,6 +355,13 @@ function TransactionItem({ transaction, onTransactionUpdated, onTransactionDelet
       {/* Hover effect indicator */}
       {isHovered && (
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-lg pointer-events-none"></div>
+      )}
+      
+      {/* Click hint - show on hover */}
+      {isHovered && (
+        <div className="absolute bottom-1 left-6 text-xs text-blue-600 opacity-75">
+          Click to edit
+        </div>
       )}
     </div>
   )

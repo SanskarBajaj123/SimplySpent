@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Modal,
   View,
@@ -13,7 +13,7 @@ import {
 } from 'react-native'
 import { supabase } from '../supabaseClient'
 
-export default function TransactionModal({ isVisible, onClose, onTransactionAdded, user }) {
+export default function TransactionModal({ isVisible, onClose, onTransactionAdded, onTransactionUpdated, user, transaction = null }) {
   const [formData, setFormData] = useState({
     amount: '',
     transaction_type: 'EXPENSE',
@@ -22,6 +22,29 @@ export default function TransactionModal({ isVisible, onClose, onTransactionAdde
     transaction_date: new Date().toISOString().split('T')[0]
   })
   const [loading, setLoading] = useState(false)
+
+  // Reset form when modal opens/closes or when transaction changes
+  useEffect(() => {
+    if (transaction) {
+      // Editing existing transaction
+      setFormData({
+        amount: transaction.amount.toString(),
+        transaction_type: transaction.transaction_type,
+        category: transaction.category,
+        notes: transaction.notes || '',
+        transaction_date: transaction.transaction_date.split('T')[0]
+      })
+    } else {
+      // Adding new transaction
+      setFormData({
+        amount: '',
+        transaction_type: 'EXPENSE',
+        category: '',
+        notes: '',
+        transaction_date: new Date().toISOString().split('T')[0]
+      })
+    }
+  }, [transaction, isVisible])
 
   const handleSubmit = async () => {
     if (!formData.amount || !formData.category) {
@@ -32,20 +55,41 @@ export default function TransactionModal({ isVisible, onClose, onTransactionAdde
     setLoading(true)
 
     try {
-      const { error } = await supabase
-        .from('transactions')
-        .insert([
-          {
-            user_id: user.id,
+      if (transaction) {
+        // Update existing transaction
+        const { error } = await supabase
+          .from('transactions')
+          .update({
             amount: parseFloat(formData.amount),
             transaction_type: formData.transaction_type,
             category: formData.category,
             notes: formData.notes || null,
             transaction_date: new Date(formData.transaction_date).toISOString()
-          }
-        ])
+          })
+          .eq('id', transaction.id)
 
-      if (error) throw error
+        if (error) throw error
+
+        onTransactionUpdated()
+      } else {
+        // Add new transaction
+        const { error } = await supabase
+          .from('transactions')
+          .insert([
+            {
+              user_id: user.id,
+              amount: parseFloat(formData.amount),
+              transaction_type: formData.transaction_type,
+              category: formData.category,
+              notes: formData.notes || null,
+              transaction_date: new Date(formData.transaction_date).toISOString()
+            }
+          ])
+
+        if (error) throw error
+
+        onTransactionAdded()
+      }
 
       // Reset form
       setFormData({
@@ -56,10 +100,9 @@ export default function TransactionModal({ isVisible, onClose, onTransactionAdde
         transaction_date: new Date().toISOString().split('T')[0]
       })
 
-      onTransactionAdded()
     } catch (error) {
-      console.error('Error adding transaction:', error)
-      Alert.alert('Error', 'Failed to add transaction: ' + error.message)
+      console.error('Error saving transaction:', error)
+      Alert.alert('Error', 'Failed to save transaction: ' + error.message)
     } finally {
       setLoading(false)
     }
@@ -71,6 +114,8 @@ export default function TransactionModal({ isVisible, onClose, onTransactionAdde
       [field]: value
     }))
   }
+
+  const isEditing = !!transaction
 
   return (
     <Modal
@@ -86,7 +131,9 @@ export default function TransactionModal({ isVisible, onClose, onTransactionAdde
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Add New Transaction</Text>
+              <Text style={styles.modalTitle}>
+                {isEditing ? 'Edit Transaction' : 'Add New Transaction'}
+              </Text>
               <TouchableOpacity onPress={onClose} style={styles.closeButton}>
                 <Text style={styles.closeButtonText}>✕</Text>
               </TouchableOpacity>
@@ -190,7 +237,7 @@ export default function TransactionModal({ isVisible, onClose, onTransactionAdde
                 disabled={loading}
               >
                 <Text style={styles.submitButtonText}>
-                  {loading ? 'Adding...' : 'Add Transaction'}
+                  {loading ? (isEditing ? 'Updating...' : 'Adding...') : (isEditing ? 'Update Transaction' : 'Add Transaction')}
                 </Text>
               </TouchableOpacity>
             </View>

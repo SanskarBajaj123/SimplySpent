@@ -18,6 +18,7 @@ export default function DashboardScreen({ route, navigation }) {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [editingTransaction, setEditingTransaction] = useState(null)
   const [summary, setSummary] = useState({
     income: 0,
     expense: 0,
@@ -81,38 +82,103 @@ export default function DashboardScreen({ route, navigation }) {
     fetchTransactions()
   }
 
+  const handleTransactionUpdated = () => {
+    setShowModal(false)
+    setEditingTransaction(null)
+    fetchTransactions()
+  }
+
+  const handleEditTransaction = (transaction) => {
+    setEditingTransaction(transaction)
+    setShowModal(true)
+  }
+
+  const handleDeleteTransaction = (transaction) => {
+    Alert.alert(
+      'Delete Transaction',
+      'Are you sure you want to delete this transaction? This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const { error } = await supabase
+                .from('transactions')
+                .delete()
+                .eq('id', transaction.id)
+
+              if (error) throw error
+
+              Alert.alert('Success', 'Transaction deleted successfully')
+              fetchTransactions()
+            } catch (error) {
+              console.error('Error deleting transaction:', error)
+              Alert.alert('Error', 'Failed to delete transaction')
+            }
+          },
+        },
+      ]
+    )
+  }
+
   const renderTransaction = ({ item }) => (
     <View style={styles.transactionItem}>
-      <View style={styles.transactionLeft}>
-        <View style={[
-          styles.iconContainer,
-          { backgroundColor: item.transaction_type === 'INCOME' ? '#dcfce7' : '#fee2e2' }
-        ]}>
-          <Ionicons 
-            name="cash-outline" 
-            size={20} 
-            color={item.transaction_type === 'INCOME' ? '#16a34a' : '#dc2626'} 
-          />
+      <TouchableOpacity 
+        style={styles.transactionContent}
+        onPress={() => handleEditTransaction(item)}
+      >
+        <View style={styles.transactionLeft}>
+          <View style={[
+            styles.iconContainer,
+            { backgroundColor: item.transaction_type === 'INCOME' ? '#dcfce7' : '#fee2e2' }
+          ]}>
+            <Ionicons 
+              name="cash-outline" 
+              size={20} 
+              color={item.transaction_type === 'INCOME' ? '#16a34a' : '#dc2626'} 
+            />
+          </View>
+          <View style={styles.transactionInfo}>
+            <Text style={styles.transactionCategory}>{item.category}</Text>
+            {item.notes && (
+              <Text style={styles.transactionNotes}>{item.notes}</Text>
+            )}
+            <Text style={styles.transactionDate}>
+              {new Date(item.transaction_date).toLocaleDateString()}
+            </Text>
+          </View>
         </View>
-        <View style={styles.transactionInfo}>
-          <Text style={styles.transactionCategory}>{item.category}</Text>
-          {item.notes && (
-            <Text style={styles.transactionNotes}>{item.notes}</Text>
-          )}
-          <Text style={styles.transactionDate}>
-            {new Date(item.transaction_date).toLocaleDateString()}
+        <View style={styles.transactionRight}>
+          <Text style={[
+            styles.transactionAmount,
+            { color: item.transaction_type === 'INCOME' ? '#16a34a' : '#dc2626' }
+          ]}>
+            {item.transaction_type === 'INCOME' ? '+' : '-'}
+            ${parseFloat(item.amount).toFixed(2)}
           </Text>
+          <Text style={styles.transactionType}>{item.transaction_type}</Text>
         </View>
-      </View>
-      <View style={styles.transactionRight}>
-        <Text style={[
-          styles.transactionAmount,
-          { color: item.transaction_type === 'INCOME' ? '#16a34a' : '#dc2626' }
-        ]}>
-          {item.transaction_type === 'INCOME' ? '+' : '-'}
-          ${parseFloat(item.amount).toFixed(2)}
-        </Text>
-        <Text style={styles.transactionType}>{item.transaction_type}</Text>
+      </TouchableOpacity>
+      
+      {/* Action Buttons */}
+      <View style={styles.actionButtons}>
+        <TouchableOpacity
+          style={[styles.actionButton, styles.editButton]}
+          onPress={() => handleEditTransaction(item)}
+        >
+          <Ionicons name="pencil" size={16} color="#2563eb" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.actionButton, styles.deleteButton]}
+          onPress={() => handleDeleteTransaction(item)}
+        >
+          <Ionicons name="trash" size={16} color="#dc2626" />
+        </TouchableOpacity>
       </View>
     </View>
   )
@@ -167,6 +233,7 @@ export default function DashboardScreen({ route, navigation }) {
       <View style={styles.transactionsContainer}>
         <View style={styles.transactionsHeader}>
           <Text style={styles.transactionsTitle}>Recent Transactions</Text>
+          <Text style={styles.transactionsSubtitle}>Tap to edit, long press for actions</Text>
         </View>
         
         <FlatList
@@ -187,7 +254,10 @@ export default function DashboardScreen({ route, navigation }) {
       {/* Floating Action Button */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => setShowModal(true)}
+        onPress={() => {
+          setEditingTransaction(null)
+          setShowModal(true)
+        }}
       >
         <Ionicons name="add" size={24} color="white" />
       </TouchableOpacity>
@@ -196,9 +266,14 @@ export default function DashboardScreen({ route, navigation }) {
       {showModal && (
         <TransactionModal
           isVisible={showModal}
-          onClose={() => setShowModal(false)}
+          onClose={() => {
+            setShowModal(false)
+            setEditingTransaction(null)
+          }}
           onTransactionAdded={handleTransactionAdded}
+          onTransactionUpdated={handleTransactionUpdated}
           user={user}
+          transaction={editingTransaction}
         />
       )}
     </View>
@@ -274,13 +349,23 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#111827',
   },
+  transactionsSubtitle: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginTop: 4,
+  },
   transactionItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#f3f4f6',
+  },
+  transactionContent: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   transactionLeft: {
     flexDirection: 'row',
@@ -324,6 +409,24 @@ const styles = StyleSheet.create({
   transactionType: {
     fontSize: 12,
     color: '#9ca3af',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    marginLeft: 8,
+  },
+  actionButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 4,
+  },
+  editButton: {
+    backgroundColor: '#dbeafe',
+  },
+  deleteButton: {
+    backgroundColor: '#fee2e2',
   },
   emptyContainer: {
     padding: 32,
