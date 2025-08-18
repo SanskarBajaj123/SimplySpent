@@ -19,11 +19,27 @@ export default function DashboardScreen({ route, navigation }) {
   const [refreshing, setRefreshing] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState(null)
+  const [profile, setProfile] = useState(null)
   const [summary, setSummary] = useState({
     income: 0,
     expense: 0,
     balance: 0
   })
+
+  const fetchProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (error) throw error
+      setProfile(data)
+    } catch (error) {
+      console.error('Error fetching profile:', error)
+    }
+  }
 
   const fetchTransactions = async () => {
     try {
@@ -69,6 +85,7 @@ export default function DashboardScreen({ route, navigation }) {
   }
 
   useEffect(() => {
+    fetchProfile()
     fetchTransactions()
   }, [user.id])
 
@@ -207,6 +224,31 @@ export default function DashboardScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
+      {/* Welcome Message */}
+      <View style={styles.welcomeContainer}>
+        <View style={styles.welcomeContent}>
+          <View style={styles.welcomeText}>
+            <Text style={styles.welcomeTitle}>
+              Welcome back,{' '}
+              <Text style={styles.usernameText}>
+                {profile?.username || user?.email?.split('@')[0] || 'User'}!
+              </Text>
+              <Text style={styles.waveEmoji}> 👋</Text>
+            </Text>
+            <Text style={styles.welcomeSubtitle}>
+              Here's your financial overview for today
+            </Text>
+          </View>
+          <View style={styles.lastUpdated}>
+            <Text style={styles.lastUpdatedLabel}>Last updated</Text>
+            <Text style={styles.lastUpdatedTime}>
+              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </Text>
+            <View style={styles.onlineIndicator} />
+          </View>
+        </View>
+      </View>
+
       {/* Summary Cards */}
       <View style={styles.summaryContainer}>
         <SummaryCard
@@ -289,6 +331,64 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  welcomeContainer: {
+    backgroundColor: 'white',
+    margin: 16,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  welcomeContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  welcomeText: {
+    flex: 1,
+  },
+  welcomeTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: 4,
+  },
+  usernameText: {
+    color: '#7c3aed',
+  },
+  waveEmoji: {
+    fontSize: 20,
+  },
+  welcomeSubtitle: {
+    fontSize: 14,
+    color: '#64748b',
+  },
+  lastUpdated: {
+    alignItems: 'flex-end',
+  },
+  lastUpdatedLabel: {
+    fontSize: 12,
+    color: '#64748b',
+  },
+  lastUpdatedTime: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginTop: 2,
+  },
+  onlineIndicator: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#22c55e',
+    marginTop: 4,
   },
   summaryContainer: {
     padding: 16,
