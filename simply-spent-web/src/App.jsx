@@ -4,6 +4,7 @@ import { supabase } from './supabaseClient'
 import AuthPage from './pages/AuthPage'
 import HomePage from './pages/HomePage'
 import MetricsPage from './pages/MetricsPage'
+import SharedTransactionsPage from './pages/SharedTransactionsPage'
 import ProfilePage from './pages/ProfilePage'
 import Navigation from './components/Navigation'
 import Footer from './components/Footer'
@@ -45,11 +46,18 @@ function AppContent() {
     console.log('App: Showing loading spinner')
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        <div className="relative">
-          <div className="animate-spin rounded-full h-32 w-32 border-4 border-blue-200 border-t-blue-600"></div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-blue-600 font-semibold text-lg">SimplySpent</div>
+        <div className="text-center">
+          <div className="mx-auto w-24 h-24 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+            <span className="text-white text-4xl">💰</span>
           </div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+            SimplySpent
+          </h1>
+          <p className="text-gray-600 mb-8">Smart Financial Tracking</p>
+          <div className="relative">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600 mx-auto"></div>
+          </div>
+          <p className="text-gray-500 mt-4">Loading your financial dashboard...</p>
         </div>
       </div>
     )
@@ -70,6 +78,7 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<HomePage user={user} />} />
           <Route path="/metrics" element={<MetricsPage user={user} />} />
+          <Route path="/shared" element={<SharedTransactionsPage user={user} />} />
           <Route path="/profile" element={<ProfilePage user={user} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

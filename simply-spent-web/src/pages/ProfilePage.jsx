@@ -35,8 +35,7 @@ function ProfilePage({ user }) {
           viewer_user_id,
           created_at,
           profiles!shared_access_viewer_user_id_fkey (
-            username,
-            email
+            username
           )
         `)
         .eq('owner_user_id', user.id)
@@ -148,13 +147,15 @@ function ProfilePage({ user }) {
         
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
-            <p className="mt-1 text-sm text-gray-900">{user.email}</p>
+            <label className="block text-sm font-medium text-gray-700">Username</label>
+            <p className="mt-1 text-sm text-gray-900">{profile?.username || 'Not set'}</p>
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700">Username</label>
-            <p className="mt-1 text-sm text-gray-900">{profile?.username || 'Not set'}</p>
+            <label className="block text-sm font-medium text-gray-700">User Initial</label>
+            <p className="mt-1 text-sm text-gray-900">
+              {(profile?.username || user?.email?.split('@')[0] || 'U').charAt(0).toUpperCase()}
+            </p>
           </div>
           
           <div>
