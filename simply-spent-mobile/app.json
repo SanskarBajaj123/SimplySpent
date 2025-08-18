@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "SimplySpent",
+    "slug": "simply-spent",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#f8fafc"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.simplyspent.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#f8fafc"
+      },
+      "package": "com.simplyspent.app",
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
+    },
+    "scheme": "simplyspent",
+    "platforms": [
+      "android",
+      "ios"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "7918be4a-cbf6-4cd2-ad62-4355cdccdd82"
+      }
+    }
+  }
+}

@@ -159,7 +159,7 @@ export default function DashboardScreen({ route, navigation }) {
             { color: item.transaction_type === 'INCOME' ? '#16a34a' : '#dc2626' }
           ]}>
             {item.transaction_type === 'INCOME' ? '+' : '-'}
-            ${parseFloat(item.amount).toFixed(2)}
+            ₹{parseFloat(item.amount).toFixed(2)}
           </Text>
           <Text style={styles.transactionType}>{item.transaction_type}</Text>
         </View>
@@ -190,7 +190,7 @@ export default function DashboardScreen({ route, navigation }) {
         <View style={styles.summaryText}>
           <Text style={styles.summaryTitle}>{title}</Text>
           <Text style={[styles.summaryAmount, { color }]}>
-            ${amount.toFixed(2)}
+            ₹{amount.toFixed(2)}
           </Text>
         </View>
       </View>

@@ -1,8 +1,37 @@
+import 'react-native-url-polyfill/auto'
 import { createClient } from '@supabase/supabase-js'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 // Environment variables - replace these with your actual values
 const SUPABASE_URL = 'https://bxlkhxstrdnccqcacarg.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4bGtoeHN0cmRuY2NxY2FjYXJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0NDM5NzUsImV4cCI6MjA3MTAxOTk3NX0'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4bGtoeHN0cmRuY2NxY2FjYXJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0NDM5NzUsImV4cCI6MjA3MTAxOTk3NX0.cvPpA9pc5x-6O48WR5MKTDhJLHi7kNegTnE0Hl3qcDw'
+
+// Create a custom storage adapter for React Native
+const customStorage = {
+  getItem: async (key) => {
+    try {
+      const value = await AsyncStorage.getItem(key)
+      return value
+    } catch (error) {
+      console.warn('Storage getItem error:', error)
+      return null
+    }
+  },
+  setItem: async (key, value) => {
+    try {
+      await AsyncStorage.setItem(key, value)
+    } catch (error) {
+      console.warn('Storage setItem error:', error)
+    }
+  },
+  removeItem: async (key) => {
+    try {
+      await AsyncStorage.removeItem(key)
+    } catch (error) {
+      console.warn('Storage removeItem error:', error)
+    }
+  }
+}
 
 // Check if environment variables are configured (not placeholder values)
 let supabase
@@ -48,19 +77,17 @@ if (SUPABASE_URL === 'https://your-project-id.supabase.co' || SUPABASE_ANON_KEY 
   console.log('✅ Supabase configured successfully!')
   
   try {
-    // Create Supabase client with React Native friendly configuration
+    // Create Supabase client with minimal configuration
     supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
+        storage: customStorage,
         autoRefreshToken: true,
-        persistSession: false, // Disable session persistence to avoid URL issues
-        detectSessionInUrl: false,
-      },
-      global: {
-        headers: {
-          'X-Client-Info': 'simply-spent-mobile'
-        }
+        persistSession: true,
+        detectSessionInUrl: false
       }
     })
+    
+    console.log('✅ Supabase client created successfully!')
   } catch (error) {
     console.error('❌ Error creating Supabase client:', error.message)
     console.log('🔄 Falling back to dummy client...')

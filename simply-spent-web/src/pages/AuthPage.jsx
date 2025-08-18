@@ -52,13 +52,19 @@ function AuthPage() {
       <div className="max-w-md w-full space-y-8 relative z-10">
         {/* Logo and Title */}
         <div className="text-center">
-                     <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
-             <span className="text-white text-2xl font-bold">SS</span>
-           </div>
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+          <div className="mx-auto w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+            <span className="text-white text-3xl">💰</span>
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+            SimplySpent
+          </h1>
+          <p className="text-gray-600 text-lg mb-4">
+            Smart Financial Tracking
+          </p>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-2">
             {isLogin ? 'Welcome Back!' : 'Join SimplySpent'}
           </h2>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-600">
             {isLogin ? 'Sign in to manage your finances' : 'Create your account to get started'}
           </p>
         </div>

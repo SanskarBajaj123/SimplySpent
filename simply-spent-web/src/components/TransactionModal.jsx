@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../supabaseClient'
 
-function TransactionModal({ isOpen, onClose, onTransactionAdded, user }) {
+function TransactionModal({ isOpen, onClose, onTransactionAdded, onTransactionUpdated, user, transaction = null }) {
   const [formData, setFormData] = useState({
     amount: '',
     transaction_type: 'EXPENSE',
@@ -39,6 +39,30 @@ function TransactionModal({ isOpen, onClose, onTransactionAdded, user }) {
       'Other'
     ]
   }
+
+  // Reset form when modal opens/closes or when transaction changes
+  useEffect(() => {
+    if (transaction) {
+      // Editing existing transaction
+      setFormData({
+        amount: transaction.amount.toString(),
+        transaction_type: transaction.transaction_type,
+        category: transaction.category,
+        notes: transaction.notes || '',
+        transaction_date: transaction.transaction_date.split('T')[0]
+      })
+    } else {
+      // Adding new transaction
+      setFormData({
+        amount: '',
+        transaction_type: 'EXPENSE',
+        category: '',
+        notes: '',
+        transaction_date: new Date().toISOString().split('T')[0]
+      })
+    }
+    setErrors({})
+  }, [transaction, isOpen])
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -81,20 +105,41 @@ function TransactionModal({ isOpen, onClose, onTransactionAdded, user }) {
     setLoading(true)
     
     try {
-      const { error } = await supabase
-        .from('transactions')
-        .insert([
-          {
-            user_id: user.id,
+      if (transaction) {
+        // Update existing transaction
+        const { error } = await supabase
+          .from('transactions')
+          .update({
             amount: parseFloat(formData.amount),
             transaction_type: formData.transaction_type,
             category: formData.category,
             notes: formData.notes,
             transaction_date: formData.transaction_date
-          }
-        ])
+          })
+          .eq('id', transaction.id)
 
-      if (error) throw error
+        if (error) throw error
+
+        onTransactionUpdated()
+      } else {
+        // Add new transaction
+        const { error } = await supabase
+          .from('transactions')
+          .insert([
+            {
+              user_id: user.id,
+              amount: parseFloat(formData.amount),
+              transaction_type: formData.transaction_type,
+              category: formData.category,
+              notes: formData.notes,
+              transaction_date: formData.transaction_date
+            }
+          ])
+
+        if (error) throw error
+
+        onTransactionAdded()
+      }
 
       // Reset form
       setFormData({
@@ -106,14 +151,16 @@ function TransactionModal({ isOpen, onClose, onTransactionAdded, user }) {
       })
       setErrors({})
       
-      onTransactionAdded()
+      onClose()
     } catch (error) {
-      console.error('Error adding transaction:', error)
+      console.error('Error saving transaction:', error)
       setErrors({ submit: error.message })
     } finally {
       setLoading(false)
     }
   }
+
+  const isEditing = !!transaction
 
   if (!isOpen) return null
 
@@ -124,14 +171,19 @@ function TransactionModal({ isOpen, onClose, onTransactionAdded, user }) {
       
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all">
+        <div className="relative w-full max-w-lg transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all">
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white flex items-center">
-                <span className="mr-2">💰</span>
-                Add New Transaction
-              </h3>
+              <div>
+                <h3 className="text-lg font-semibold text-white flex items-center">
+                  <span className="mr-2">{isEditing ? '✏️' : '💰'}</span>
+                  {isEditing ? 'Edit Transaction' : 'Add New Transaction'}
+                </h3>
+                <p className="text-blue-100 text-sm mt-1">
+                  {isEditing ? 'Update your transaction details' : 'Track your income or expense'}
+                </p>
+              </div>
               <button
                 onClick={onClose}
                 className="text-white hover:text-gray-200 transition-colors duration-200"
@@ -151,14 +203,14 @@ function TransactionModal({ isOpen, onClose, onTransactionAdded, user }) {
                 Amount <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg font-semibold">₹</span>
                 <input
                   type="number"
                   step="0.01"
                   min="0"
                   value={formData.amount}
                   onChange={(e) => handleInputChange('amount', e.target.value)}
-                  className={`w-full pl-8 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                  className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-lg ${
                     errors.amount ? 'border-red-300 bg-red-50' : 'border-gray-300'
                   }`}
                   placeholder="0.00"
@@ -178,28 +230,28 @@ function TransactionModal({ isOpen, onClose, onTransactionAdded, user }) {
                 <button
                   type="button"
                   onClick={() => handleInputChange('transaction_type', 'EXPENSE')}
-                  className={`p-3 rounded-xl border-2 transition-all duration-200 ${
+                  className={`p-4 rounded-xl border-2 transition-all duration-200 hover:shadow-md ${
                     formData.transaction_type === 'EXPENSE'
-                      ? 'border-red-500 bg-red-50 text-red-700'
+                      ? 'border-red-500 bg-red-50 text-red-700 shadow-md'
                       : 'border-gray-300 hover:border-gray-400'
                   }`}
                 >
                   <div className="flex items-center justify-center space-x-2">
-                    <span className="text-lg">💸</span>
+                    <span className="text-xl">💸</span>
                     <span className="font-medium">Expense</span>
                   </div>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleInputChange('transaction_type', 'INCOME')}
-                  className={`p-3 rounded-xl border-2 transition-all duration-200 ${
+                  className={`p-4 rounded-xl border-2 transition-all duration-200 hover:shadow-md ${
                     formData.transaction_type === 'INCOME'
-                      ? 'border-green-500 bg-green-50 text-green-700'
+                      ? 'border-green-500 bg-green-50 text-green-700 shadow-md'
                       : 'border-gray-300 hover:border-gray-400'
                   }`}
                 >
                   <div className="flex items-center justify-center space-x-2">
-                    <span className="text-lg">💰</span>
+                    <span className="text-xl">💰</span>
                     <span className="font-medium">Income</span>
                   </div>
                 </button>
@@ -286,10 +338,10 @@ function TransactionModal({ isOpen, onClose, onTransactionAdded, user }) {
                 {loading ? (
                   <div className="flex items-center justify-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Adding...
+                    {isEditing ? 'Updating...' : 'Adding...'}
                   </div>
                 ) : (
-                  'Add Transaction'
+                  isEditing ? 'Update Transaction' : 'Add Transaction'
                 )}
               </button>
             </div>

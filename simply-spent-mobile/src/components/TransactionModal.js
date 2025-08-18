@@ -22,6 +22,35 @@ export default function TransactionModal({ isVisible, onClose, onTransactionAdde
     transaction_date: new Date().toISOString().split('T')[0]
   })
   const [loading, setLoading] = useState(false)
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false)
+
+  // Fixed category options
+  const categoryOptions = {
+    EXPENSE: [
+      'Food & Dining',
+      'Transportation',
+      'Shopping',
+      'Entertainment',
+      'Healthcare',
+      'Utilities',
+      'Rent/Mortgage',
+      'Insurance',
+      'Education',
+      'Travel',
+      'Subscriptions',
+      'Other'
+    ],
+    INCOME: [
+      'Salary',
+      'Freelance',
+      'Investment',
+      'Business',
+      'Gift',
+      'Refund',
+      'Bonus',
+      'Other'
+    ]
+  }
 
   // Reset form when modal opens/closes or when transaction changes
   useEffect(() => {
@@ -49,6 +78,11 @@ export default function TransactionModal({ isVisible, onClose, onTransactionAdde
   const handleSubmit = async () => {
     if (!formData.amount || !formData.category) {
       Alert.alert('Error', 'Please fill in all required fields')
+      return
+    }
+
+    if (parseFloat(formData.amount) <= 0) {
+      Alert.alert('Error', 'Amount must be greater than 0')
       return
     }
 
@@ -113,6 +147,23 @@ export default function TransactionModal({ isVisible, onClose, onTransactionAdde
       ...prev,
       [field]: value
     }))
+
+    // Clear category when switching transaction type
+    if (field === 'transaction_type') {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value,
+        category: ''
+      }))
+    }
+  }
+
+  const selectCategory = (category) => {
+    setFormData(prev => ({
+      ...prev,
+      category
+    }))
+    setShowCategoryPicker(false)
   }
 
   const isEditing = !!transaction
@@ -130,56 +181,68 @@ export default function TransactionModal({ isVisible, onClose, onTransactionAdde
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
+            {/* Header */}
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                {isEditing ? 'Edit Transaction' : 'Add New Transaction'}
-              </Text>
+              <View style={styles.headerContent}>
+                <Text style={styles.modalTitle}>
+                  {isEditing ? 'Edit Transaction' : 'Add New Transaction'}
+                </Text>
+                <Text style={styles.modalSubtitle}>
+                  {isEditing ? 'Update your transaction details' : 'Track your income or expense'}
+                </Text>
+              </View>
               <TouchableOpacity onPress={onClose} style={styles.closeButton}>
                 <Text style={styles.closeButtonText}>✕</Text>
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.formContainer}>
+            <ScrollView style={styles.formContainer} showsVerticalScrollIndicator={false}>
               {/* Amount */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Amount</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="0.00"
-                  value={formData.amount}
-                  onChangeText={(value) => handleInputChange('amount', value)}
-                  keyboardType="numeric"
-                />
+                <Text style={styles.label}>Amount <Text style={styles.required}>*</Text></Text>
+                <View style={styles.amountContainer}>
+                  <Text style={styles.currencySymbol}>₹</Text>
+                  <TextInput
+                    style={styles.amountInput}
+                    placeholder="0.00"
+                    value={formData.amount}
+                    onChangeText={(value) => handleInputChange('amount', value)}
+                    keyboardType="numeric"
+                    placeholderTextColor="#9CA3AF"
+                  />
+                </View>
               </View>
 
               {/* Transaction Type */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Type</Text>
-                <View style={styles.radioGroup}>
+                <Text style={styles.label}>Type <Text style={styles.required}>*</Text></Text>
+                <View style={styles.typeContainer}>
                   <TouchableOpacity
                     style={[
-                      styles.radioButton,
-                      formData.transaction_type === 'EXPENSE' && styles.radioButtonSelected
+                      styles.typeButton,
+                      formData.transaction_type === 'EXPENSE' && styles.typeButtonActive
                     ]}
                     onPress={() => handleInputChange('transaction_type', 'EXPENSE')}
                   >
+                    <Text style={styles.typeIcon}>💸</Text>
                     <Text style={[
-                      styles.radioButtonText,
-                      formData.transaction_type === 'EXPENSE' && styles.radioButtonTextSelected
+                      styles.typeText,
+                      formData.transaction_type === 'EXPENSE' && styles.typeTextActive
                     ]}>
                       Expense
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
-                      styles.radioButton,
-                      formData.transaction_type === 'INCOME' && styles.radioButtonSelected
+                      styles.typeButton,
+                      formData.transaction_type === 'INCOME' && styles.typeButtonActive
                     ]}
                     onPress={() => handleInputChange('transaction_type', 'INCOME')}
                   >
+                    <Text style={styles.typeIcon}>💰</Text>
                     <Text style={[
-                      styles.radioButtonText,
-                      formData.transaction_type === 'INCOME' && styles.radioButtonTextSelected
+                      styles.typeText,
+                      formData.transaction_type === 'INCOME' && styles.typeTextActive
                     ]}>
                       Income
                     </Text>
@@ -189,12 +252,50 @@ export default function TransactionModal({ isVisible, onClose, onTransactionAdde
 
               {/* Category */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Category</Text>
+                <Text style={styles.label}>Category <Text style={styles.required}>*</Text></Text>
+                <TouchableOpacity
+                  style={styles.categoryButton}
+                  onPress={() => setShowCategoryPicker(!showCategoryPicker)}
+                >
+                  <Text style={[
+                    styles.categoryButtonText,
+                    !formData.category && styles.categoryButtonPlaceholder
+                  ]}>
+                    {formData.category || 'Select a category'}
+                  </Text>
+                  <Text style={styles.categoryButtonIcon}>▼</Text>
+                </TouchableOpacity>
+
+                {/* Category Picker */}
+                {showCategoryPicker && (
+                  <View style={styles.categoryPicker}>
+                    <ScrollView style={styles.categoryList} showsVerticalScrollIndicator={false}>
+                      {categoryOptions[formData.transaction_type].map((category) => (
+                        <TouchableOpacity
+                          key={category}
+                          style={styles.categoryOption}
+                          onPress={() => selectCategory(category)}
+                        >
+                          <Text style={styles.categoryOptionText}>{category}</Text>
+                          {formData.category === category && (
+                            <Text style={styles.categoryOptionCheck}>✓</Text>
+                          )}
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+                )}
+              </View>
+
+              {/* Date */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Date <Text style={styles.required}>*</Text></Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="e.g., Food, Salary, Transportation"
-                  value={formData.category}
-                  onChangeText={(value) => handleInputChange('category', value)}
+                  placeholder="YYYY-MM-DD"
+                  value={formData.transaction_date}
+                  onChangeText={(value) => handleInputChange('transaction_date', value)}
+                  placeholderTextColor="#9CA3AF"
                 />
               </View>
 
@@ -208,26 +309,17 @@ export default function TransactionModal({ isVisible, onClose, onTransactionAdde
                   onChangeText={(value) => handleInputChange('notes', value)}
                   multiline
                   numberOfLines={3}
-                />
-              </View>
-
-              {/* Date */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Date</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="YYYY-MM-DD"
-                  value={formData.transaction_date}
-                  onChangeText={(value) => handleInputChange('transaction_date', value)}
+                  placeholderTextColor="#9CA3AF"
                 />
               </View>
             </ScrollView>
 
-            {/* Buttons */}
+            {/* Action Buttons */}
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={styles.cancelButton}
                 onPress={onClose}
+                disabled={loading}
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
@@ -236,9 +328,18 @@ export default function TransactionModal({ isVisible, onClose, onTransactionAdde
                 onPress={handleSubmit}
                 disabled={loading}
               >
-                <Text style={styles.submitButtonText}>
-                  {loading ? (isEditing ? 'Updating...' : 'Adding...') : (isEditing ? 'Update Transaction' : 'Add Transaction')}
-                </Text>
+                {loading ? (
+                  <View style={styles.loadingContainer}>
+                    <Text style={styles.loadingText}>●</Text>
+                    <Text style={styles.submitButtonText}>
+                      {isEditing ? 'Updating...' : 'Adding...'}
+                    </Text>
+                  </View>
+                ) : (
+                  <Text style={styles.submitButtonText}>
+                    {isEditing ? 'Update Transaction' : 'Add Transaction'}
+                  </Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -256,8 +357,8 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     maxHeight: '90%',
   },
   modalContent: {
@@ -266,31 +367,41 @@ const styles = StyleSheet.create({
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
+    alignItems: 'flex-start',
+    marginBottom: 24,
+  },
+  headerContent: {
+    flex: 1,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#111827',
+    marginBottom: 4,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: '#6B7280',
   },
   closeButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#f3f4f6',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F3F4F6',
     justifyContent: 'center',
     alignItems: 'center',
+    marginLeft: 12,
   },
   closeButtonText: {
     fontSize: 16,
-    color: '#6b7280',
+    color: '#6B7280',
+    fontWeight: '600',
   },
   formContainer: {
-    maxHeight: 400,
+    maxHeight: 500,
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   label: {
     fontSize: 16,
@@ -298,54 +409,134 @@ const styles = StyleSheet.create({
     color: '#374151',
     marginBottom: 8,
   },
+  required: {
+    color: '#EF4444',
+  },
+  amountContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 12,
+    backgroundColor: 'white',
+    paddingHorizontal: 16,
+  },
+  currencySymbol: {
+    fontSize: 18,
+    color: '#6B7280',
+    marginRight: 8,
+    fontWeight: '600',
+  },
+  amountInput: {
+    flex: 1,
+    fontSize: 18,
+    paddingVertical: 16,
+    color: '#111827',
+  },
+  typeContainer: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  typeButton: {
+    flex: 1,
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    backgroundColor: 'white',
+  },
+  typeButtonActive: {
+    borderColor: '#2563EB',
+    backgroundColor: '#EFF6FF',
+  },
+  typeIcon: {
+    fontSize: 20,
+    marginBottom: 4,
+  },
+  typeText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  typeTextActive: {
+    color: '#2563EB',
+  },
+  categoryButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 12,
+    padding: 16,
+    backgroundColor: 'white',
+  },
+  categoryButtonText: {
+    fontSize: 16,
+    color: '#111827',
+  },
+  categoryButtonPlaceholder: {
+    color: '#9CA3AF',
+  },
+  categoryButtonIcon: {
+    fontSize: 12,
+    color: '#6B7280',
+  },
+  categoryPicker: {
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    backgroundColor: 'white',
+    maxHeight: 200,
+  },
+  categoryList: {
+    padding: 8,
+  },
+  categoryOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  categoryOptionText: {
+    fontSize: 16,
+    color: '#374151',
+  },
+  categoryOptionCheck: {
+    fontSize: 16,
+    color: '#2563EB',
+    fontWeight: 'bold',
+  },
   input: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    padding: 12,
+    borderColor: '#D1D5DB',
+    borderRadius: 12,
+    padding: 16,
     fontSize: 16,
     backgroundColor: 'white',
+    color: '#111827',
   },
   textArea: {
     height: 80,
     textAlignVertical: 'top',
   },
-  radioGroup: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  radioButton: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    padding: 12,
-    alignItems: 'center',
-  },
-  radioButtonSelected: {
-    backgroundColor: '#2563eb',
-    borderColor: '#2563eb',
-  },
-  radioButtonText: {
-    fontSize: 16,
-    color: '#374151',
-  },
-  radioButtonTextSelected: {
-    color: 'white',
-    fontWeight: '600',
-  },
   buttonContainer: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 20,
+    marginTop: 24,
   },
   cancelButton: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
+    borderColor: '#D1D5DB',
+    borderRadius: 12,
     padding: 16,
     alignItems: 'center',
+    backgroundColor: 'white',
   },
   cancelButtonText: {
     fontSize: 16,
@@ -354,8 +545,8 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     flex: 1,
-    backgroundColor: '#2563eb',
-    borderRadius: 8,
+    backgroundColor: '#2563EB',
+    borderRadius: 12,
     padding: 16,
     alignItems: 'center',
   },
@@ -366,5 +557,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: 'white',
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: 'white',
+    marginRight: 8,
+    animationName: 'spin',
   },
 })
