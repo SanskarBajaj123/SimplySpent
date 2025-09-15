@@ -47,8 +47,12 @@ function AppContent() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         <div className="text-center">
-          <div className="mx-auto w-24 h-24 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
-            <span className="text-white text-4xl">💰</span>
+          <div className="mx-auto w-24 h-24 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+            <img 
+              src="/logo.png" 
+              alt="SimplySpent Logo" 
+              className="w-24 h-24 rounded-2xl"
+            />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
             SimplySpent
