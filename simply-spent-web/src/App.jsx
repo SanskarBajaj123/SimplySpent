@@ -49,7 +49,7 @@ function AppContent() {
         <div className="text-center">
           <div className="mx-auto w-24 h-24 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
             <img 
-              src="/logo.svg" 
+              src="/logo.png" 
               alt="SimplySpent Logo" 
               className="w-24 h-24 rounded-2xl"
             />
