@@ -25,6 +25,10 @@ export default function DashboardScreen({ route, navigation }) {
     expense: 0,
     balance: 0
   })
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+  const [page, setPage] = useState(0)
+  const [allTransactions, setAllTransactions] = useState([])
 
   const fetchProfile = async () => {
     try {
@@ -41,34 +45,22 @@ export default function DashboardScreen({ route, navigation }) {
     }
   }
 
-  const fetchTransactions = async () => {
+  const fetchSummary = async () => {
     try {
       const { data, error } = await supabase
         .from('transactions')
-        .select('*')
+        .select('amount, transaction_type')
         .eq('user_id', user.id)
-        .order('transaction_date', { ascending: false })
-        .limit(10)
 
       if (error) throw error
-      setTransactions(data || [])
-      
-      // Calculate summary
-      const currentMonth = new Date().getMonth()
-      const currentYear = new Date().getFullYear()
-      
-      const monthlyTransactions = data?.filter(t => {
-        const date = new Date(t.transaction_date)
-        return date.getMonth() === currentMonth && date.getFullYear() === currentYear
-      }) || []
 
-      const income = monthlyTransactions
-        .filter(t => t.transaction_type === 'INCOME')
-        .reduce((sum, t) => sum + parseFloat(t.amount), 0)
+      const income = data
+        ?.filter(t => t.transaction_type === 'INCOME')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0) || 0
       
-      const expense = monthlyTransactions
-        .filter(t => t.transaction_type === 'EXPENSE')
-        .reduce((sum, t) => sum + parseFloat(t.amount), 0)
+      const expense = data
+        ?.filter(t => t.transaction_type === 'EXPENSE')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0) || 0
 
       setSummary({
         income,
@@ -76,33 +68,83 @@ export default function DashboardScreen({ route, navigation }) {
         balance: income - expense
       })
     } catch (error) {
+      console.error('Error fetching summary:', error)
+    }
+  }
+
+  const fetchTransactions = async (reset = false) => {
+    try {
+      const currentPage = reset ? 0 : page
+      const pageSize = 20
+      const from = currentPage * pageSize
+      const to = from + pageSize - 1
+
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('transaction_date', { ascending: false })
+        .range(from, to)
+
+      if (error) throw error
+      
+      if (reset) {
+        setAllTransactions(data || [])
+        setTransactions(data || [])
+        setPage(1)
+      } else {
+        setAllTransactions(prev => [...prev, ...(data || [])])
+        setTransactions(prev => [...prev, ...(data || [])])
+        setPage(prev => prev + 1)
+      }
+      
+      setHasMore((data || []).length === pageSize)
+    } catch (error) {
       console.error('Error fetching transactions:', error)
       Alert.alert('Error', 'Failed to load transactions')
     } finally {
       setLoading(false)
       setRefreshing(false)
+      setLoadingMore(false)
     }
   }
 
   useEffect(() => {
     fetchProfile()
-    fetchTransactions()
+    fetchSummary()
+    fetchTransactions(true)
   }, [user.id])
 
   const onRefresh = () => {
     setRefreshing(true)
-    fetchTransactions()
+    setPage(0)
+    setHasMore(true)
+    fetchSummary()
+    fetchTransactions(true)
+  }
+
+  const loadMore = () => {
+    if (!loadingMore && hasMore) {
+      setLoadingMore(true)
+      fetchTransactions(false)
+    }
   }
 
   const handleTransactionAdded = () => {
     setShowModal(false)
-    fetchTransactions()
+    setPage(0)
+    setHasMore(true)
+    fetchSummary()
+    fetchTransactions(true)
   }
 
   const handleTransactionUpdated = () => {
     setShowModal(false)
     setEditingTransaction(null)
-    fetchTransactions()
+    setPage(0)
+    setHasMore(true)
+    fetchSummary()
+    fetchTransactions(true)
   }
 
   const handleEditTransaction = (transaction) => {
@@ -252,29 +294,29 @@ export default function DashboardScreen({ route, navigation }) {
       {/* Summary Cards */}
       <View style={styles.summaryContainer}>
         <SummaryCard
-          title="This Month's Income"
+          title="Total Income"
           amount={summary.income}
           color="#16a34a"
           icon="trending-up"
         />
         <SummaryCard
-          title="This Month's Expense"
+          title="Total Expenses"
           amount={summary.expense}
           color="#dc2626"
           icon="trending-down"
         />
         <SummaryCard
-          title="Current Balance"
+          title="Total Balance"
           amount={summary.balance}
           color={summary.balance >= 0 ? "#16a34a" : "#dc2626"}
           icon="wallet"
         />
       </View>
 
-      {/* Recent Transactions */}
+      {/* All Transactions */}
       <View style={styles.transactionsContainer}>
         <View style={styles.transactionsHeader}>
-          <Text style={styles.transactionsTitle}>Recent Transactions</Text>
+          <Text style={styles.transactionsTitle}>All Transactions ({transactions.length})</Text>
           <Text style={styles.transactionsSubtitle}>Tap to edit, long press for actions</Text>
         </View>
         
@@ -285,10 +327,23 @@ export default function DashboardScreen({ route, navigation }) {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.1}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>No transactions yet. Add your first transaction!</Text>
             </View>
+          }
+          ListFooterComponent={
+            loadingMore ? (
+              <View style={styles.loadingMoreContainer}>
+                <Text style={styles.loadingMoreText}>Loading more transactions...</Text>
+              </View>
+            ) : !hasMore && transactions.length > 0 ? (
+              <View style={styles.endContainer}>
+                <Text style={styles.endText}>You've reached the end of your transactions</Text>
+              </View>
+            ) : null
           }
         />
       </View>
@@ -536,6 +591,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#6b7280',
     textAlign: 'center',
+  },
+  loadingMoreContainer: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  loadingMoreText: {
+    fontSize: 14,
+    color: '#6b7280',
+    fontStyle: 'italic',
+  },
+  endContainer: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  endText: {
+    fontSize: 14,
+    color: '#9ca3af',
+    fontStyle: 'italic',
   },
   fab: {
     position: 'absolute',
