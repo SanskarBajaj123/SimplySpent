@@ -12,6 +12,7 @@ import {
   ActivityIndicator
 } from 'react-native'
 import { supabase } from '../supabaseClient'
+import Logo from '../components/Logo'
 
 export default function AuthScreen({ onAuthSuccess }) {
   const [isLogin, setIsLogin] = useState(true)
@@ -64,7 +65,7 @@ export default function AuthScreen({ onAuthSuccess }) {
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         {/* Logo and Branding Section */}
         <View style={styles.brandingContainer}>
-          <Text style={styles.logo}>💰</Text>
+          <Logo size={80} />
           <Text style={styles.appName}>SimplySpent</Text>
           <Text style={styles.tagline}>Smart Financial Tracking</Text>
         </View>

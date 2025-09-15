@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, ActivityIndicator } from 'react-native'
 import { supabase } from './src/supabaseClient'
 import AuthScreen from './src/screens/AuthScreen'
 import AppNavigator from './src/navigation/AppNavigator'
+import Logo from './src/components/Logo'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -62,7 +63,7 @@ export default function App() {
     return (
       <View style={styles.container}>
         <View style={styles.logoContainer}>
-          <Text style={styles.logo}>💰</Text>
+          <Logo size={80} />
           <Text style={styles.appName}>SimplySpent</Text>
           <Text style={styles.tagline}>Smart Financial Tracking</Text>
         </View>
@@ -76,7 +77,7 @@ export default function App() {
     return (
       <View style={styles.container}>
         <View style={styles.logoContainer}>
-          <Text style={styles.logo}>💰</Text>
+          <Logo size={80} />
           <Text style={styles.appName}>SimplySpent</Text>
         </View>
         <Text style={styles.errorText}>Error: {error}</Text>
