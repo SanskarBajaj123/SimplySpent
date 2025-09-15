@@ -54,7 +54,7 @@ function AuthPage() {
         <div className="text-center">
           <div className="mx-auto w-20 h-20 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
             <img 
-              src="/logo.png" 
+              src="/logo.svg" 
               alt="SimplySpent Logo" 
               className="w-20 h-20 rounded-2xl"
             />
