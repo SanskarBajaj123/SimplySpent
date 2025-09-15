@@ -19,7 +19,7 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#f8fafc",
-        "foregroundImage": "./assets/logo.png"
+        "foregroundImage": "./assets/logo.svg"
       },
       "package": "com.simplyspent.app",
       "permissions": [

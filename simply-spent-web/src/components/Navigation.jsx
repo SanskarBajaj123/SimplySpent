@@ -42,7 +42,7 @@ function Navigation({ user, currentPath }) {
             <div className="flex items-center space-x-3">
               <div className="flex-shrink-0">
                 <img 
-                  src="/logo.png" 
+                  src="/logo.svg" 
                   alt="SimplySpent Logo" 
                   className="w-10 h-10 rounded-xl shadow-lg"
                 />
