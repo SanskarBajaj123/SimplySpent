@@ -12,6 +12,38 @@ function Dashboard({ user }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deletingTransaction, setDeletingTransaction] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [displayedTransactions, setDisplayedTransactions] = useState([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [summary, setSummary] = useState({ income: 0, expenses: 0, balance: 0 })
+  const transactionsPerPage = 10
+
+  const fetchSummary = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('amount, transaction_type')
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      const income = data
+        ?.filter(t => t.transaction_type === 'INCOME')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0) || 0
+      
+      const expenses = data
+        ?.filter(t => t.transaction_type === 'EXPENSE')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0) || 0
+
+      setSummary({
+        income,
+        expenses,
+        balance: income - expenses
+      })
+    } catch (error) {
+      console.error('Error fetching summary:', error)
+    }
+  }
 
   const fetchTransactions = async () => {
     try {
@@ -23,6 +55,7 @@ function Dashboard({ user }) {
 
       if (error) throw error
       setTransactions(data || [])
+      updateDisplayedTransactions(data || [], 1)
     } catch (error) {
       console.error('Error fetching transactions:', error)
     } finally {
@@ -30,7 +63,26 @@ function Dashboard({ user }) {
     }
   }
 
+  const updateDisplayedTransactions = (allTransactions, page) => {
+    const startIndex = (page - 1) * transactionsPerPage
+    const endIndex = startIndex + transactionsPerPage
+    setDisplayedTransactions(allTransactions.slice(0, endIndex))
+  }
+
+  const loadMore = () => {
+    if (displayedTransactions.length < transactions.length) {
+      setLoadingMore(true)
+      setTimeout(() => {
+        const nextPage = currentPage + 1
+        updateDisplayedTransactions(transactions, nextPage)
+        setCurrentPage(nextPage)
+        setLoadingMore(false)
+      }, 500) // Small delay for better UX
+    }
+  }
+
   useEffect(() => {
+    fetchSummary()
     fetchTransactions()
   }, [user.id])
 
@@ -62,6 +114,8 @@ function Dashboard({ user }) {
       if (error) throw error
 
       setTransactions(prev => prev.filter(t => t.id !== deletingTransaction.id))
+      setDisplayedTransactions(prev => prev.filter(t => t.id !== deletingTransaction.id))
+      fetchSummary() // Refresh summary after deletion
       setShowDeleteModal(false)
       setDeletingTransaction(null)
     } catch (error) {
@@ -78,28 +132,13 @@ function Dashboard({ user }) {
   }
 
   const handleTransactionUpdated = () => {
+    fetchSummary()
     fetchTransactions()
     setShowModal(false)
     setEditingTransaction(null)
+    setCurrentPage(1)
   }
 
-  const calculateSummary = () => {
-    const income = transactions
-      .filter(t => t.transaction_type === 'INCOME')
-      .reduce((sum, t) => sum + parseFloat(t.amount), 0)
-    
-    const expenses = transactions
-      .filter(t => t.transaction_type === 'EXPENSE')
-      .reduce((sum, t) => sum + parseFloat(t.amount), 0)
-    
-    return {
-      income,
-      expenses,
-      balance: income - expenses
-    }
-  }
-
-  const summary = calculateSummary()
 
   if (loading) {
     return (
@@ -154,14 +193,14 @@ function Dashboard({ user }) {
         </div>
       </div>
 
-      {/* Recent Transactions */}
+      {/* All Transactions */}
       <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200/50">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xl font-bold text-gray-900">Recent Transactions</h3>
+              <h3 className="text-xl font-bold text-gray-900">All Transactions</h3>
               <p className="text-sm text-gray-500">
-                {transactions.length} transaction{transactions.length !== 1 ? 's' : ''} total
+                Showing {displayedTransactions.length} of {transactions.length} transaction{transactions.length !== 1 ? 's' : ''}
               </p>
             </div>
             <button
@@ -191,22 +230,54 @@ function Dashboard({ user }) {
             </div>
           ) : (
             <div className="space-y-4">
-              {transactions.map((transaction) => (
-                <TransactionItem
-                  key={transaction.id}
-                  transaction={transaction}
+              {displayedTransactions.map((transaction) => (
+               <TransactionItem 
+                 key={transaction.id} 
+                 transaction={transaction}
                   onEdit={handleEditTransaction}
                   onDelete={handleDeleteTransaction}
                 />
               ))}
+              
+              {/* Load More Button */}
+              {displayedTransactions.length < transactions.length && (
+                <div className="text-center pt-6">
+                  <button
+                    onClick={loadMore}
+                    disabled={loadingMore}
+                    className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 mx-auto"
+                  >
+                    {loadingMore ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                        <span>Loading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Load More</span>
+                        <span className="text-sm">({transactions.length - displayedTransactions.length} remaining)</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+              
+              {/* End Message */}
+              {displayedTransactions.length === transactions.length && transactions.length > 0 && (
+                <div className="text-center pt-6">
+                  <p className="text-sm text-gray-500 italic">
+                    You've reached the end of your transactions
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
 
       {/* Transaction Modal */}
-      <TransactionModal
-        isOpen={showModal}
+        <TransactionModal
+          isOpen={showModal}
         onClose={() => {
           setShowModal(false)
           setEditingTransaction(null)
@@ -214,8 +285,8 @@ function Dashboard({ user }) {
         onTransactionAdded={handleTransactionUpdated}
         onTransactionUpdated={handleTransactionUpdated}
         editingTransaction={editingTransaction}
-        user={user}
-      />
+          user={user}
+        />
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
