@@ -44,8 +44,12 @@ function Navigation({ user, currentPath }) {
                 <img 
                   src="/logo.png" 
                   alt="SimplySpent Logo" 
-                  className="w-10 h-10 rounded-xl shadow-lg"
+                  className="w-10 h-10 rounded-xl shadow-lg object-cover"
+                  onError={(e) => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }}
                 />
+                <div style={{display:'none'}} className="w-10 h-10 rounded-xl shadow-lg bg-gradient-to-br from-blue-500 to-purple-600 items-center justify-center">
+                  <span className="text-white text-lg font-bold">💰</span>
+                </div>
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">

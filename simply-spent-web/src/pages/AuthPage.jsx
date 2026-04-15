@@ -26,6 +26,7 @@ function AuthPage() {
           email,
           password,
           options: {
+            emailRedirectTo: 'https://simply-spent-dusky.vercel.app',
             data: {
               username: username,
             }
@@ -56,8 +57,12 @@ function AuthPage() {
             <img 
               src="/logo.png" 
               alt="SimplySpent Logo" 
-              className="w-20 h-20 rounded-2xl"
+              className="w-20 h-20 rounded-2xl object-cover"
+              onError={(e) => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }}
             />
+            <div style={{display:'none'}} className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 items-center justify-center text-4xl">
+              💰
+            </div>
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
             SimplySpent
