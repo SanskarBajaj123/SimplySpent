@@ -54,13 +54,7 @@ function AuthPage() {
         {/* Logo and Title */}
         <div className="text-center">
           <div className="mx-auto w-20 h-20 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
-            <img 
-              src="/logo.png" 
-              alt="SimplySpent Logo" 
-              className="w-20 h-20 rounded-2xl object-cover"
-              onError={(e) => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }}
-            />
-            <div style={{display:'none'}} className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 items-center justify-center text-4xl">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-5xl shadow-lg">
               💰
             </div>
           </div>
