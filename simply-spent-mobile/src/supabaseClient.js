@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 
 // Environment variables - replace these with your actual values
 const SUPABASE_URL = 'https://qgxovqimhiespljbgzwg.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFneG92cWltaGllc3BsamJnendnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjIyNzE1MiwiZXhwIjoyMDkxODAzMTUyfQ.CSnJt5FBbixGCf-HYMz8vIPC8Au52tQWiAi_JK6qrrI'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFneG92cWltaGllc3BsamJnendnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMjcxNTIsImV4cCI6MjA5MTgwMzE1Mn0.yVWQFnIuc8AIk1uu2_HDWNwl2AUS-1AiNx1W6tjw6hk'
 
 // Create a custom storage adapter for React Native
 const customStorage = {
