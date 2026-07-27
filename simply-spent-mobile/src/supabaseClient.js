@@ -1,10 +1,7 @@
 import 'react-native-url-polyfill/auto'
 import { createClient } from '@supabase/supabase-js'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-
-// Environment variables - replace these with your actual values
-const SUPABASE_URL = 'https://qgxovqimhiespljbgzwg.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFneG92cWltaGllc3BsamJnendnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMjcxNTIsImV4cCI6MjA5MTgwMzE1Mn0.yVWQFnIuc8AIk1uu2_HDWNwl2AUS-1AiNx1W6tjw6hk'
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@env'
 
 // Create a custom storage adapter for React Native
 const customStorage = {

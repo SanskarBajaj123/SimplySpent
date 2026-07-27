@@ -12,12 +12,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Ping SimplySpent Supabase
+      - name: Ping SimplySpent DB via health endpoint
         run: |
-          echo "Pinging SimplySpent Supabase..."
-          curl --fail --silent --show-error \
-            --max-time 30 --retry 2 --retry-delay 5 \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/"
+          echo "Pinging /api/health-db..."
+          STATUS=$(curl --silent --max-time 30 --retry 2 --retry-delay 5 \
+            -w "%{http_code}" -o /tmp/body.txt \
+            "https://simply-spent-dusky.vercel.app/api/health-db")
+          echo "Response: $(cat /tmp/body.txt)"
+          echo "HTTP status: $STATUS"
+          if [ "$STATUS" -lt 200 ] || [ "$STATUS" -ge 300 ]; then
+            echo "Error: got HTTP $STATUS"
+            exit 1
+          fi
           echo "DB ping OK"
