@@ -72,8 +72,8 @@ Add these environment variables in Vercel:
 2. Add the following variables:
 
 ```
-VITE_SUPABASE_URL=https://bxlkhxstrdnccqcacarg.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4bGtoeHN0cmRuY2NxY2FjYXJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0NDM5NzUsImV4cCI6MjA3MTAxOTk3NX0.cvPpA9pc5x-6O48WR5MKTDhJLHi7kNegTnE0Hl3qcDw
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 3. Set **Environment**: Production, Preview, and Development
